@@ -29,12 +29,14 @@ function cleanup() {
 }
 
 function selectDrbdDevices() {
-  xmllint --xpath "/domain/devices/disk/source[starts-with(@dev, '/dev/drbd/by-res/')]/@dev" $1;
+  x_dev=$(xmllint --xpath "/domain/devices/disk/source[starts-with(@dev, '/dev/drbd/by-res/')]/@dev" $1)
+  x_file=$(xmllint --xpath "/domain/devices/disk/source[starts-with(@file, '/dev/drbd/by-res/')]/@file" $1)
+  echo "$x_dev  $x_file"
 }
 
 function setRole() {
   role=$1;
-  resourceName=$(echo $2 | sed -e 's|^dev="/dev/drbd/by-res/\(.*\)"|\1|');
+  resourceName=$(echo $2 | sed -e 's|^dev="/dev/drbd/by-res/\(.*\)"|\1|' | sed -e 's|^file="/dev/drbd/by-res/\(.*\)"|\1|');
   for i in $(seq $MAX_ATTEMPTS); do
     #echo "attempt $i: drbdadm $role $resourceName" >>/var/log/libvirt/hook-qemu.log
     /sbin/drbdadm $role $resourceName && return;
